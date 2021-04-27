@@ -9,6 +9,7 @@ locals {
  
   prefix = ["${local.naming_product}${local.naming_env}${local.naming_zone}", local.naming_component ]
 
+  sa_services = ["blob", "table", "queue", "file"]
   global_settings = {
     region_primary      = "eastus2"
     region_secondary    = "eastus"
@@ -56,12 +57,29 @@ module "vnet" {
 
   nsg_name                       = module.naming.network_security_group.name
 
-  #create_private_dns             = true
-  dns = {
-    private_dns_zone_name       = "privatelink.${local.global_settings.region_primary}.azmk8s.io"
-    link_name                   = module.naming.private_link_service.name
-    vnet_auto_registration      = true
-  }
+
+  dns = [
+    {
+      private_dns_zone_name       = "privatelink.${local.global_settings.region_primary}.azmk8s.io"
+      link_name                   = join("-", [module.naming.private_link_service.name,"aks"])
+      vnet_auto_registration      = true
+    },
+    {
+      private_dns_zone_name       = "privatelink.blob.core.windows.net"
+      link_name                   = join("-", [module.naming.private_link_service.name,"sa","blob"])
+      vnet_auto_registration      = false
+    },
+    {
+      private_dns_zone_name       = "privatelink.file.core.windows.net"
+      link_name                   = join("-", [module.naming.private_link_service.name,"sa","file"])
+      vnet_auto_registration      = false
+    },
+    {
+      private_dns_zone_name       = "privatelink.table.core.windows.net"
+      link_name                   = join("-", [module.naming.private_link_service.name,"sa","table"])
+      vnet_auto_registration      = false
+    }
+  ]
 
   subnets = {
     aks_subnet = {
