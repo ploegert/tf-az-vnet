@@ -33,6 +33,11 @@ output "subnet_ids" {
   value       = flatten(concat([for s in azurerm_subnet.snet : s.id], [var.gateway_subnet_address_prefix != null ? azurerm_subnet.gw_snet.0.id : null], [var.firewall_subnet_address_prefix != null ? azurerm_subnet.fw-snet.0.id : null]))
 }
 
+output "subnet_ids_no_gw_or_fw" {
+  description = "List of IDs of subnets"
+  value       = flatten(concat([for s in azurerm_subnet.snet : s.id]))
+}
+
 output "subnet_address_prefixes" {
   description = "List of address prefix for subnets"
   value       = flatten(concat([for s in azurerm_subnet.snet : s.address_prefix], [var.gateway_subnet_address_prefix != null ? azurerm_subnet.gw_snet.0.address_prefixes : null], [var.firewall_subnet_address_prefix != null ? azurerm_subnet.fw-snet.0.address_prefixes : null]))
